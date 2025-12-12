@@ -1,2 +1,228 @@
 # Calculator
 just using html , css  and js
+<br>
+Code : 
+<br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .calculator {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 32px;
+            padding: 25px;
+            width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .display {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            color: #fff;
+            padding: 30px 20px;
+            border-radius: 24px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .previous-operand {
+            font-size: 18px;
+            color: rgba(255,255,255,0.6);
+            min-height: 24px;
+            text-align: right;
+            word-wrap: break-word;
+        }
+
+        .current-operand {
+            font-size: 36px;
+            font-weight: bold;
+            min-height: 45px;
+            text-align: right;
+            word-wrap: break-word;
+            margin-top: 4px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            padding: 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        button:hover { transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+
+        /* Ripple effect */
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            transform: translate(-50%, -50%);
+            transition: 0.6s;
+        }
+        button:active::before { width: 300px; height: 300px; }
+
+        .number { background: linear-gradient(145deg, #42a5f5, #2196f3); color: #fff; }
+        .number:hover { background: linear-gradient(145deg, #64b5f6, #42a5f5); }
+
+        .operator { background: linear-gradient(145deg, #ff7043, #ff5722); color: #fff; }
+        .operator:hover { background: linear-gradient(145deg, #ff8a65, #ff7043); }
+
+        .clear { background: linear-gradient(145deg, #ef5350, #f44336); color: #fff; grid-column: span 2; }
+        .delete { background: linear-gradient(145deg, #ec407a, #e91e63); color: #fff; }
+
+        .equals { background: linear-gradient(145deg, #66bb6a, #4caf50); color: #fff; grid-column: span 2; }
+        .zero { grid-column: span 2; }
+
+        .calculator-title {
+            text-align: center;
+            font-size: 24px; font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <h2 class="calculator-title">Calculator</h2>
+
+        <div class="display">
+            <div class="previous-operand" id="previous"></div>
+            <div class="current-operand" id="current">0</div>
+        </div>
+
+        <div class="buttons">
+            <button class="clear" onclick="clearDisplay()">AC</button>
+            <button class="delete" onclick="deleteNumber()">DEL</button>
+            <button class="operator" onclick="appendOperator('÷')">÷</button>
+
+            <button class="number" onclick="appendNumber('7')">7</button>
+            <button class="number" onclick="appendNumber('8')">8</button>
+            <button class="number" onclick="appendNumber('9')">9</button>
+            <button class="operator" onclick="appendOperator('×')">×</button>
+
+            <button class="number" onclick="appendNumber('4')">4</button>
+            <button class="number" onclick="appendNumber('5')">5</button>
+            <button class="number" onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="appendOperator('-')">-</button>
+
+            <button class="number" onclick="appendNumber('1')">1</button>
+            <button class="number" onclick="appendNumber('2')">2</button>
+            <button class="number" onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="appendOperator('+')">+</button>
+
+            <button class="number zero" onclick="appendNumber('0')">0</button>
+            <button class="number" onclick="appendNumber('.')">.</button>
+            <button class="equals" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let currentOperand = '0';
+        let previousOperand = '';
+        let operation = null;
+
+        function updateDisplay() {
+            document.getElementById('current').textContent = currentOperand;
+            document.getElementById('previous').textContent =
+                operation ? ${previousOperand} ${operation} : previousOperand;
+        }
+
+        function appendNumber(num) {
+            if (num === '.' && currentOperand.includes('.')) return;
+            if (currentOperand === '0' && num !== '.') currentOperand = num;
+            else currentOperand += num;
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (currentOperand === '') return;
+            if (previousOperand !== '') calculate();
+            operation = op;
+            previousOperand = currentOperand;
+            currentOperand = '';
+            updateDisplay();
+        }
+
+        function calculate() {
+            const prev = parseFloat(previousOperand);
+            const curr = parseFloat(currentOperand);
+            if (isNaN(prev) || isNaN(curr)) return;
+
+            let result;
+            switch (operation) {
+                case '+': result = prev + curr; break;
+                case '-': result = prev - curr; break;
+                case '×': result = prev * curr; break;
+                case '÷':
+                    if (curr === 0) { alert("Cannot divide by zero!"); clearDisplay(); return; }
+                    result = prev / curr;
+                    break;
+                default: return;
+            }
+
+            currentOperand = result.toString();
+            previousOperand = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            currentOperand = '0';
+            previousOperand = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function deleteNumber() {
+            if (currentOperand.length <= 1) currentOperand = '0';
+            else currentOperand = currentOperand.slice(0, -1);
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+            if (e.key === '.') appendNumber('.');
+            if (['+', '-'].includes(e.key)) appendOperator(e.key);
+            if (e.key === '*') appendOperator('×');
+            if (e.key === '/') appendOperator('÷');
+            if (e.key === 'Enter' || e.key === '=') calculate();
+            if (e.key === 'Backspace') deleteNumber();
+            if (e.key === 'Escape') clearDisplay();
+        });
+    </script>
+</body>
+</html>
